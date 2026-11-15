@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>作品｜mmou 美甲工作室</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section>
+  <h2>作品</h2>
+  <p class="h2sub">依系列整理，點進去看完整照片。部分作品攝於舊店。</p>
+  <div class="series" id="ser"></div>
+  <a class="cta alt" href="https://www.instagram.com/the.mmou" target="_blank" rel="noopener">到 Instagram 看更多作品</a>
+</section>
+<script>const $=id=>document.getElementById(id);</script>
+<script src="common.js"></script>
+<script>
+$("ser").innerHTML=SERIES.map(s=>`<a class="sc" href="series.html?s=${s.id}"><div class="im" style="background-image:url(img/${s.imgs[0]}.jpg)"></div><div class="tx"><b>${s.name}</b><span>${s.imgs.length} 張・${s.desc}</span></div></a>`).join("");
+</script>
+</body>
+</html>

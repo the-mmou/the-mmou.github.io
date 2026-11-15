@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>時段表｜mmou 美甲工作室</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section>
+  <h2>最近可約</h2>
+  <p class="h2sub">每個時段保留約 4 小時，彼此不重疊<br>點選時間即可帶入預約</p>
+  <div class="days" id="days"></div>
+  <a class="cta" href="book.html" id="ctaBook">前往預約 →</a>
+  <a class="cta alt" href="https://ig.me/m/the.mmou" target="_blank" rel="noopener">傳 IG 私訊詢問</a>
+</section>
+<script>const $=id=>document.getElementById(id);</script>
+<script src="common.js"></script>
+<script>
+loadSlots().then(m=>{
+  if(!m){
+    $("days").innerHTML='<div class="day"><div class="none">時段由工作室每週開放，請傳 IG 私訊詢問可約時間。</div></div>';
+    $("ctaBook").textContent="填寫預約資訊，傳 IG 私訊";return}
+  const t=new Date();let h="";
+  for(let i=1;i<=14;i++){
+    const d=new Date(t.getFullYear(),t.getMonth(),t.getDate()+i),k=ymd(d),l=m[k]||[];
+    h+=`<div class="day ${l.length?'':'off'}"><span class="d">${d.getMonth()+1}/${d.getDate()}</span><span class="w">週${WDAY[d.getDay()]}</span>`+
+      (l.length?`<div class="slots">${l.map(x=>`<a class="slot" href="book.html?d=${k}&t=${x}">${x}</a>`).join("")}</div>`:'<div class="none">未開放或已額滿</div>')+`</div>`;
+  }
+  $("days").innerHTML=h;
+}).catch(()=>{$("days").innerHTML='<div class="day"><div class="none">時段暫時載入不到，請到預約頁或私訊詢問。</div></div>'});
+</script>
+</body>
+</html>

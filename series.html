@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>作品系列｜mmou 美甲工作室</title>
+<meta name="description" content="竹南手作凝膠美甲工作室，預約制。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section class="page-h"><p class="crumb"><a href="index.html">作品</a> › <span id="cn"></span></p>
+<h2 id="sn"></h2><p class="lead" id="sd"></p>
+<div class="grid" id="grid"></div>
+<div class="sticky-cta"><a class="btn" href="book.html">喜歡這個系列？去預約</a></div>
+<div class="pn" id="pn"></div></section>
+<div id="lb" role="dialog" aria-label="放大照片"><b id="lbx">×</b><span class="nv" id="lbp" style="left:0">‹</span><img id="lbi" alt=""><span class="nv" id="lbn" style="right:0">›</span></div>
+<script>const $=id=>document.getElementById(id);</script>
+<script src="common.js"></script>
+<script>
+const id=new URLSearchParams(location.search).get("s");
+let k=SERIES.findIndex(s=>s.id===id);if(k<0)k=0;const S=SERIES[k];
+document.title=S.name+"｜mmou 美甲工作室";$("cn").textContent=S.name;$("sn").textContent=S.name;$("sd").textContent=S.desc;
+$("grid").className="grid"+(S.imgs.length<3?" n"+S.imgs.length:"");$("grid").innerHTML=S.imgs.map((w,i)=>`<div class="work" data-i="${i}"><img src="img/${w}.jpg" alt="${S.name}"></div>`).join("");
+const P=SERIES[(k+SERIES.length-1)%SERIES.length],N=SERIES[(k+1)%SERIES.length];
+$("pn").innerHTML=`<a href="series.html?s=${P.id}"><small>‹ 上一個系列</small>${P.name}</a><a href="series.html?s=${N.id}"><small>下一個系列 ›</small>${N.name}</a>`;
+let li=0;const shown=S.imgs;
+function open_(i){li=(i+shown.length)%shown.length;$("lbi").src="img/"+shown[li]+".jpg";$("lb").style.display="flex"}
+$("grid").onclick=e=>{const w=e.target.closest(".work");if(w)open_(+w.dataset.i)};
+$("lbx").onclick=()=>$("lb").style.display="none";
+$("lb").onclick=e=>{if(e.target===$("lb"))$("lb").style.display="none"};
+$("lbp").onclick=()=>open_(li-1);$("lbn").onclick=()=>open_(li+1);
+document.addEventListener("keydown",e=>{if($("lb").style.display==="flex"){if(e.key==="Escape")$("lb").style.display="none";if(e.key==="ArrowLeft")open_(li-1);if(e.key==="ArrowRight")open_(li+1)}});
+</script>
+</body>
+</html>

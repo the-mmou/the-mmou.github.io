@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>線上預約｜mmou 美甲工作室</title>
+<meta name="description" content="竹南手作凝膠美甲工作室，預約制。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section id="book">
+  <h2>預約與估價</h2>
+  <p class="lead">不用註冊。選好項目與時間，送出後工作室會回覆確認。</p>
+  <div class="book">
+    <div class="card">
+      <div class="block">
+        <p class="q" id="est"><i>1</i>選款式</p>
+        <div class="opts" id="styles"></div>
+        <p class="note" style="margin-top:8px">自帶圖請選「自帶圖」，私訊傳圖報價（三張為限，仿作無法 100% 複製）。</p>
+      </div>
+      <div class="block">
+        <p class="q"><i>2</i>跳色與加購</p>
+        <div class="stepper" id="stC"><button type="button" id="cm" aria-label="減少跳色">−</button><b id="cn">0</b><button type="button" id="cp" aria-label="增加跳色">+</button><span>跳色數量（每色 +50）</span></div>
+        <div class="stepper" id="stF" style="margin-top:10px"><button type="button" id="fm" aria-label="減少補甲">−</button><b id="fn">0</b><button type="button" id="fp" aria-label="增加補甲">+</button><span>補甲指數（每指 60）</span></div>
+        <div class="opts" id="adds" style="margin-top:12px"></div>
+      </div>
+      <div class="block">
+        <p class="q"><i>3</i>目前指甲狀況</p>
+        <div class="opts" id="removal"></div>
+      </div>
+      <div class="block" style="margin-bottom:0">
+        <p class="q"><i>4</i>想預約的時間</p>
+        <div class="picked" id="picked" style="display:none"></div>
+        <div id="pickMode" style="display:none">
+          <label class="f" style="margin-top:0">日期（只列出工作室開放的日子）</label>
+          <div class="chips" id="dch"></div>
+          <label class="f">開始時間（每個時段約 4 小時）</label>
+          <div class="chips" id="tch"></div>
+        </div>
+        <div id="freeMode">
+          <div class="two">
+            <div><label class="f" style="margin-top:0">希望日期</label><input type="date" id="date"></div>
+            <div><label class="f" style="margin-top:0">希望開始時間</label><select id="slot"><option value="09:00">09:00</option><option value="13:00" selected>13:00</option><option value="17:00">17:00</option></select></div>
+          </div>
+          <p class="note" style="margin-top:8px">每個時段約 4 小時，實際時段由工作室回覆確認。</p>
+        </div>
+      </div>
+      <div class="block" style="margin:26px 0 0">
+        <p class="q"><i>5</i>怎麼聯絡你</p>
+        <label class="f" style="margin-top:0">姓名 / 暱稱</label><input type="text" id="name" autocomplete="name" maxlength="40">
+        <label class="f">聯絡方式（IG 帳號或 LINE）</label><input type="text" id="contact" maxlength="60">
+        <label class="f">備註（想要的風格、過敏、手指狀況…）</label><textarea id="want" rows="3" maxlength="300"></textarea>
+        <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      </div>
+    </div>
+
+    <aside class="card sum">
+      <h3>你的預約</h3>
+      <div id="lines"></div>
+      <div class="tot"><span>預估總價</span><b id="total">NT$ 800</b></div>
+      <p class="note">實際價格以確認訊息為準。</p>
+      <button class="btn" id="submit" type="button" style="display:none">送出預約</button>
+      <p class="note" id="status" style="margin-top:8px"></p>
+      <button class="btn" id="gen" type="button">產生預約訊息</button>
+      <div id="msg"></div>
+      <div class="send" id="send">
+        <button class="btn line" id="copy" type="button">複製訊息</button>
+        <a class="btn" id="ig" href="https://ig.me/m/the.mmou" target="_blank" rel="noopener">傳到 IG 私訊</a>
+      </div>
+    </aside>
+  </div>
+</section>
+
+
+<script>const $=id=>document.getElementById(id);</script>
+<script src="common.js"></script>
+<script>
+const styles=[["單色",800],["碎鑽 / 特殊膠",900],["貓眼",1000],["漸層",1200],["鏡面",1300],["法式",1400],["自帶圖（傳圖報價）",0],["不做款式（只卸甲／只保養）",0]];
+const SELF=6,NONE=7;
+const adds=[["遮游離線 / 底色",100],["指緣精華導入",150],["基礎保養單做",700],["卸除指甲油 / 硬甲油",100]];
+const rem=[["新做",0,"","不需卸甲"],["卸甲續作（本店）",200,"卸甲續作（本店）","本店做的"],["卸甲續作（他店）",300,"卸甲續作（他店）","他店做的"],["純卸甲",500,"純卸甲","含修甲型"]];
+const PURE=3;
+const fmt=n=>"NT$ "+n.toLocaleString();
+$("styles").innerHTML=styles.map((s,i)=>`<div class="opt"><input type="radio" name="st" id="s${i}" value="${i}" ${i==0?'checked':''}><label for="s${i}">${s[0]}<small>${i==SELF?'私訊報價':i==NONE?'—':fmt(s[1])}</small></label></div>`).join("");
+$("adds").innerHTML=adds.map((s,i)=>`<div class="opt"><input type="checkbox" id="a${i}" value="${i}"><label for="a${i}">${s[0]}<small>+${s[1]}</small></label></div>`).join("");
+$("removal").innerHTML=rem.map((s,i)=>`<div class="opt"><input type="radio" name="rm" id="r${i}" value="${i}" ${i==0?'checked':''}><label for="r${i}">${s[0]}<small>${s[3]}${s[1]?'　+'+s[1]:''}</small></label></div>`).join("");
+let colors=0,fills=0;
+$("cm").onclick=()=>{colors=Math.max(0,colors-1);calc()};$("cp").onclick=()=>{colors=Math.min(10,colors+1);calc()};
+$("fm").onclick=()=>{fills=Math.max(0,fills-1);calc()};$("fp").onclick=()=>{fills=Math.min(10,fills+1);calc()};
+const q=sel=>document.querySelector(sel);
+function sync(){ /* 規則：純卸甲＝不做款式；凝膠款已含基礎保養，不可再單做保養 */
+  const pure=+q("[name=rm]:checked").value===PURE;
+  if(pure&&+q("[name=st]:checked").value!==NONE)$("s"+NONE).checked=true;
+  const none=+q("[name=st]:checked").value===NONE;
+  document.querySelectorAll("[name=st]").forEach(x=>{x.disabled=pure&&+x.value!==NONE});
+  $("a0").disabled=none;if(none)$("a0").checked=false;
+  $("a2").disabled=!none;if(!none)$("a2").checked=false;
+  if(none)colors=0;
+  $("stC").classList.toggle("off",none);
+}
+function state(){
+  sync();
+  const si=+q("[name=st]:checked").value,s=styles[si],r=rem[+q("[name=rm]:checked").value];
+  const L=[];
+  if(si!==NONE)L.push([s[0],s[1],si===SELF]);
+  if(colors)L.push([`跳色 ×${colors}`,colors*50]);
+  document.querySelectorAll("#adds input:checked").forEach(x=>L.push(adds[+x.value]));
+  if(fills)L.push([`補甲 ×${fills} 指`,fills*60]);
+  if(r[1])L.push([r[2],r[1]]);
+  return{L,self:si===SELF,total:L.reduce((t,x)=>t+x[1],0)};
+}
+const totalText=(t,self)=>self?(t?fmt(t)+" ＋款式傳圖報價":"傳圖報價"):fmt(t);
+function calc(){
+  const{L,self,total}=state();$("cn").textContent=colors;$("fn").textContent=fills;
+  $("lines").innerHTML=L.length?L.map(x=>`<div class="line"><span>${x[0]}</span><span>${x[2]?'傳圖報價':fmt(x[1])}</span></div>`).join(""):'<div class="line"><span>尚未選擇項目</span><span></span></div>';
+  const t=totalText(total,self);$("total").textContent=t;$("barTotal").textContent=t;
+}
+document.querySelectorAll("#styles,#adds,#removal").forEach(e=>e.addEventListener("input",calc));
+calc();
+$("date").min=ymd(new Date());
+const qs=new URLSearchParams(location.search),qd=qs.get("d"),qt=qs.get("t");
+let slotsMap=null,selD="",selT="";
+const fd=k=>{const d=new Date(k+"T00:00:00");return `${d.getMonth()+1}/${d.getDate()} 週${WDAY[d.getDay()]}`};
+function showPicked(){const p=$("picked");if(selD&&selT){p.style.display="";p.innerHTML=`你選的時段：<b>${fd(selD)} ${selT}</b>`}else p.style.display="none"}
+function drawTimes(){
+  const l=(slotsMap&&slotsMap[selD])||[];
+  if(!l.includes(selT))selT="";
+  $("tch").innerHTML=l.length?l.map(t=>`<div class="chip"><input type="radio" name="tt" id="t${t.replace(':','')}" value="${t}" ${t===selT?'checked':''}><label for="t${t.replace(':','')}">${t}</label></div>`).join(""):'<span class="note">請先選日期</span>';
+  showPicked();
+}
+function drawDates(){
+  const ks=Object.keys(slotsMap).sort();
+  $("dch").innerHTML=ks.length?ks.map(k=>`<div class="chip"><input type="radio" name="dd" id="d${k}" value="${k}" ${k===selD?'checked':''}><label for="d${k}">${fd(k)}</label></div>`).join(""):'<span class="note">目前沒有開放的時段，請私訊詢問。</span>';
+  drawTimes();
+}
+$("dch").addEventListener("input",e=>{selD=e.target.value;selT="";drawTimes()});
+$("tch").addEventListener("input",e=>{selT=e.target.value;showPicked()});
+const getD=()=>slotsMap?selD:$("date").value, getT=()=>slotsMap?selT:$("slot").value;
+loadSlots().then(m=>{
+  if(!m){ if(qd)$("date").value=qd; if(START_TIMES.includes(qt))$("slot").value=qt; return }
+  slotsMap=m;$("freeMode").style.display="none";$("pickMode").style.display="";
+  if(qd&&m[qd]){selD=qd;if(m[qd].includes(qt))selT=qt}
+  drawDates();
+}).catch(()=>{});
+if(API){$("submit").style.display="block";$("gen").className="btn line";$("gen").textContent="產生預約訊息（改用 IG 私訊）"}
+function check(){
+  const miss=[];
+  if(!getD())miss.push("日期");if(!getT())miss.push("開始時間");if(!$("name").value.trim())miss.push("姓名");if(!$("contact").value.trim())miss.push("聯絡方式");
+  if(!state().L.length)miss.push("項目");
+  $("status").textContent=miss.length?"⚠️ 請先填寫："+miss.join("、"):"";
+  return !miss.length;
+}
+function build(){
+  const{L,self,total}=state();
+  return `【預約申請】\n姓名：${$("name").value}\n聯絡：${$("contact").value}\n希望時間：${getD()} ${getT()}（約 4 小時）\n項目：${L.map(x=>x[0]).join("＋")}\n預估：${totalText(total,self)}\n備註：${$("want").value||"無"}`;
+}
+let text="";
+$("submit").onclick=async()=>{
+  const st=$("status");if(!check())return;
+  if($("website").value)return;
+  $("submit").disabled=true;st.textContent="送出中…";
+  try{
+    const{L,self,total}=state();
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({name:$("name").value.trim(),contact:$("contact").value.trim(),date:getD(),time:getT(),items:L.map(x=>x[0]).join("＋"),total:totalText(total,self),note:$("want").value,website:$("website").value})});
+    const j=await r.json();
+    if(j.ok){st.textContent="✅ 預約已送出！我會盡快透過你留的聯絡方式確認。";if(slotsMap&&slotsMap[selD]){slotsMap[selD]=slotsMap[selD].filter(x=>x!==selT);if(!slotsMap[selD].length)delete slotsMap[selD]}selT="";drawDates()}
+    else{st.textContent="⚠️ "+j.error;$("submit").disabled=false;loadSlots().then(m=>{if(m){slotsMap=m;drawDates()}})}
+  }catch(e){st.textContent="⚠️ 送出失敗，請改用「產生預約訊息」傳 IG 私訊";$("submit").disabled=false}
+};
+$("gen").onclick=()=>{
+  if(!check())return;
+  text=build();
+  $("msg").textContent=text;$("msg").style.display="block";$("send").style.display="flex";
+  $("msg").scrollIntoView({behavior:"smooth",block:"nearest"});
+};
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t)}catch(e){const x=document.createElement("textarea");x.value=t;document.body.appendChild(x);x.select();document.execCommand("copy");x.remove()}
+}
+$("copy").onclick=async()=>{
+  text=build();$("msg").textContent=text;await copyText(text);
+  $("copy").textContent="已複製 ✓";setTimeout(()=>$("copy").textContent="複製訊息",1800);
+};
+$("ig").addEventListener("click",()=>{text=build();copyText(text);$("status").textContent="訊息已複製，到 IG 私訊貼上送出即可。"});
+</script>
+</body>
+</html>
